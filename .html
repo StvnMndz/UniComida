@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniComida</title>
+
+<style>
+body { margin:0; font-family:Arial; background:#f4f4f4; }
+
+.container {
+    max-width:1200px;
+    margin:auto;
+    background:white;
+    min-height:100vh;
+}
+
+/* HEADER */
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 20px;
+    background: linear-gradient(135deg, #2e7d66, #3fa68a);
+    color:white;
+}
+
+.logo { font-size:30px; font-weight:bold; }
+
+.cart-btn {
+    background:white;
+    color:#2e7d66;
+    padding:8px 15px;
+    border-radius:20px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+h3 { padding-left:10px; }
+
+/* GRID */
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:15px;
+    padding:10px;
+}
+
+.card {
+    background:#fafafa;
+    border-radius:15px;
+    padding:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 🔥 IMAGEN ARREGLADA */
+.card img {
+    width:100%;
+    height:150px;
+    object-fit:cover;
+    border-radius:10px;
+    background:#ddd;
+}
+
+.btn {
+    width:100%;
+    padding:8px;
+    background:#2e7d66;
+    color:white;
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+
+/* REST */
+.restaurant {
+    padding:10px;
+    margin:10px;
+    border-radius:10px;
+    background:#eee;
+    cursor:pointer;
+}
+
+.selected { background:#2e7d66; color:white; }
+
+/* MODAL */
+.modal {
+    position:fixed;
+    top:0; left:0;
+    width:100%; height:100%;
+    background:rgba(0,0,0,0.5);
+    display:none;
+    justify-content:center;
+    align-items:center;
+}
+
+.modal-content {
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    width:320px;
+}
+
+.cart {
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#2e7d66;
+    color:white;
+    padding:15px;
+    border-radius:50%;
+    cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+    <div class="logo">🍽️ UniComida</div>
+    <div class="cart-btn" onclick="abrirCarrito()">🛒 <span id="count">0</span></div>
+</div>
+
+<h3>Menú</h3>
+<div class="grid" id="menu"></div>
+
+<h3>Restaurantes</h3>
+<div id="restaurantes">
+<div class="restaurant" onclick="selectRest(this,'Don Pollo')">Don Pollo ⭐4.4</div>
+<div class="restaurant" onclick="selectRest(this,'La Parrilla')">La Parrilla ⭐4.6</div>
+<div class="restaurant" onclick="selectRest(this,'Mr Fast Food')">Mr Fast Food ⭐4.1</div>
+<div class="restaurant" onclick="selectRest(this,'Veggie Life')">Veggie Life ⭐4.8</div>
+<div class="restaurant" onclick="selectRest(this,'Dulce Tentación')">Dulce Tentación ⭐4.9</div>
+<div class="restaurant" onclick="selectRest(this,'Street Food Perú')">Street Food Perú ⭐4.3</div>
+<div class="restaurant" onclick="selectRest(this,'Sabor Criollo')">Sabor Criollo ⭐4.7</div>
+<div class="restaurant" onclick="selectRest(this,'La Casa del Sabor')">La Casa del Sabor ⭐4.5</div>
+<div class="restaurant" onclick="selectRest(this,'Fast & Good')">Fast & Good ⭐4.2</div>
+<div class="restaurant" onclick="selectRest(this,'Natural Food')">Natural Food ⭐4.6</div>
+</div>
+
+</div>
+
+<div class="cart" onclick="abrirCarrito()">🛒</div>
+
+<div class="modal" id="modal">
+<div class="modal-content">
+<h3>Carrito</h3>
+<ul id="lista"></ul>
+<div id="total"></div>
+<div id="rest"></div>
+<button class="btn" onclick="pagar()">Pagar</button>
+<button class="btn" onclick="cerrar()">Cerrar</button>
+<p id="estado"></p>
+</div>
+</div>
+
+<script>
+
+/* 🔥 IMÁGENES ULTRA SEGURAS (Pexels) */
+const productos = [
+{nombre:"Arroz con pollo", precio:12, img:"https://images.pexels.com/photos/723198/pexels-photo-723198.jpeg"},
+{nombre:"Lomo saltado", precio:15, img:"https://images.pexels.com/photos/70497/pexels-photo-70497.jpeg"},
+{nombre:"Ají de gallina", precio:14, img:"https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg"},
+{nombre:"Hamburguesa", precio:10, img:"https://images.pexels.com/photos/1639557/pexels-photo-1639557.jpeg"},
+{nombre:"Pizza", precio:18, img:"https://images.pexels.com/photos/315755/pexels-photo-315755.jpeg"},
+{nombre:"Hot Dog", precio:8, img:"https://images.pexels.com/photos/1600711/pexels-photo-1600711.jpeg"},
+{nombre:"Ensalada", precio:8, img:"https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg"},
+{nombre:"Wrap vegetariano", precio:9, img:"https://images.pexels.com/photos/461198/pexels-photo-461198.jpeg"},
+{nombre:"Helado", precio:6, img:"https://images.pexels.com/photos/1352278/pexels-photo-1352278.jpeg"},
+{nombre:"Torta", precio:7, img:"https://images.pexels.com/photos/291528/pexels-photo-291528.jpeg"}
+];
+
+let carrito = [];
+let restaurante = "";
+
+function mostrar(){
+let html="";
+productos.forEach(p=>{
+html+=`
+<div class="card">
+<img src="${p.img}" 
+onerror="this.src='https://via.placeholder.com/300x150?text=Comida'">
+<h4>${p.nombre}</h4>
+<p>S/${p.precio}</p>
+<button class="btn" onclick="add('${p.nombre}',${p.precio})">Agregar</button>
+</div>`;
+});
+document.getElementById("menu").innerHTML=html;
+}
+
+function add(n,p){
+carrito.push({n,p});
+document.getElementById("count").innerText=carrito.length;
+}
+
+function selectRest(el,n){
+document.querySelectorAll(".restaurant").forEach(r=>r.classList.remove("selected"));
+el.classList.add("selected");
+restaurante=n;
+}
+
+function abrirCarrito(){
+document.getElementById("modal").style.display="flex";
+let lista="", total=0;
+
+carrito.forEach(i=>{
+lista+=`<li>${i.n} - S/${i.p}</li>`;
+total+=i.p;
+});
+
+document.getElementById("lista").innerHTML=lista;
+document.getElementById("total").innerText="Total: S/"+total;
+document.getElementById("rest").innerText="Restaurante: "+(restaurante||"No seleccionado");
+}
+
+function cerrar(){ document.getElementById("modal").style.display="none"; }
+
+function pagar(){
+if(carrito.length==0) return alert("Agrega productos");
+if(restaurante=="") return alert("Selecciona restaurante");
+
+document.getElementById("estado").innerText="Pago confirmado ✅";
+carrito=[];
+document.getElementById("count").innerText=0;
+}
+
+mostrar();
+
+</script>
+
+</body>
+</html>
